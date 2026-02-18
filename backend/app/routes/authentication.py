@@ -14,7 +14,6 @@ from auth.cookie import get_user, set_auth_cookie, clear_auth_cookie
 from auth.mail import sendcode
 
 
-
 router = APIRouter(prefix="", tags=["authentication"])
 
 @router.get("/protected")

@@ -6,7 +6,6 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
-
 class User(Base):
     __tablename__ = "users"
     __table_args__ = {"sqlite_autoincrement": True} 
@@ -18,6 +17,7 @@ class User(Base):
     name = Column(String(24), nullable=False)
     surname = Column(String(24), nullable=False)
     password = Column(String(256), nullable=False) 
+    isadmin = Column(Boolean, default=False, nullable=False) 
 
     is_verified = Column(Boolean, default=False)
     email_code = Column(String(4), nullable=True)
