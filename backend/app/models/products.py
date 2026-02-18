@@ -19,7 +19,8 @@ class Product(Base):
     upload_url = Column(String, nullable=True)
     date = Column(DateTime, default=datetime.utcnow)
     
-    price = Column(Numeric(10, 2), nullable=False)
+    price = Column(Numeric(10, 2), default=0, nullable=False)
+    stock = Column(Integer, default=0, nullable=False)
     # currency = Column(String(3), nullable=False)
 
     category_id = Column(Integer, ForeignKey("categories.id"))

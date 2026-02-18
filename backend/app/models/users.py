@@ -18,7 +18,7 @@ class User(Base):
     surname = Column(String(24), nullable=False)
     password = Column(String(256), nullable=False) 
     isadmin = Column(Boolean, default=False, nullable=False) 
-
+    
     is_verified = Column(Boolean, default=False)
     email_code = Column(String(4), nullable=True)
     

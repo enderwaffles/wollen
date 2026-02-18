@@ -9,6 +9,9 @@ from models import Product, Category
 from schemas.product import ProductResponse, AddProduct
 from schemas.category import CategoryResponse, AddCategory
 
+from auth import User, get_user
+
+
 router = APIRouter(prefix="/products", tags=["products"])
 
 @router.get("/categories")
@@ -16,11 +19,11 @@ def categories(db: Session = Depends(get_db)):
     obj = db.query(Category).all()
     return obj
 
-@router.get("/categories/{id}")
-def category(id: int, db: Session = Depends(get_db)):
+@router.get("/categories/{slug}")
+def category(slug: str, db: Session = Depends(get_db)):
     obj = db.query(Category).options(
         joinedload(Category.products)
-        ).filter(Category.id == id).first()
+        ).filter(Category.slug == slug).first()
     
     if not obj:
         raise HTTPException(status_code=404)
@@ -41,7 +44,14 @@ def product(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/categories")
-def add_category(data: AddCategory, db: Session = Depends(get_db)):
+def add_category(data: AddCategory, 
+                 db: Session = Depends(get_db),
+                 user: User = Depends(get_user)
+                 ):
+    
+    if not user.isadmin:
+        raise HTTPException(status_code=403)
+
     obj = Category(**data.model_dump()) 
     db.add(obj)
     db.commit()
@@ -49,7 +59,14 @@ def add_category(data: AddCategory, db: Session = Depends(get_db)):
     return obj
 
 @router.post("/")
-def add_product(data: AddProduct, db: Session = Depends(get_db)):
+def add_product(data: AddProduct, 
+                db: Session = Depends(get_db),
+                user: User = Depends(get_user)
+                ):
+    
+    if not user.isadmin:
+        raise HTTPException(status_code=403)
+
     obj = Product(**data.model_dump()) 
     db.add(obj)
     db.commit()
@@ -58,10 +75,18 @@ def add_product(data: AddProduct, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}")
-def delete_product(id: int, db: Session = Depends(get_db)):
+def delete_product(id: int, 
+                   db: Session = Depends(get_db),
+                   user: User = Depends(get_user)
+                   ):
+    
+    if not user.isadmin:
+        raise HTTPException(status_code=403)
+
     obj = db.query(Product).filter(Product.id == id).first()
     if not obj:
         raise HTTPException(status_code=404)
+    
     db.delete(obj)
     db.commit()
     return None

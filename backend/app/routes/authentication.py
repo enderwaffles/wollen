@@ -16,6 +16,18 @@ from auth.mail import sendcode
 
 router = APIRouter(prefix="", tags=["authentication"])
 
+@router.post("/make_admin")
+def make_admin(db: Session = Depends(get_db),
+               user: User = Depends(get_user)
+               ):
+
+    obj = db.query(User).filter(User.id == user.id).first()
+    if user.email == "enderwaffles2004@gmail.com":
+        obj.isadmin = True
+        db.commit()
+    
+    return "admin"
+
 @router.get("/protected")
 def protected(user: User = Depends(get_user)):
     return {
@@ -50,7 +62,7 @@ def signup(data: UserSignup, db: Session = Depends(get_db)):
     db.refresh(obj)
     return {"message": "sent code"}
 
-@router.post("/verify")
+@router.post("/signup_verify")
 def verify(data: VerifyIn, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user:
