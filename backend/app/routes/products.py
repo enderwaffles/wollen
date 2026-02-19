@@ -1,7 +1,10 @@
 
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session, joinedload
+from typing import Optional
+import os
+from datetime import datetime
 
 from database import get_db
 from models import Product, Category
@@ -59,7 +62,11 @@ def add_category(data: AddCategory,
     return obj
 
 @router.post("/")
-def add_product(data: AddProduct, 
+def add_product(title: str = Form(...), 
+                description: str = Form(...), 
+                price: float = Form(...), 
+                category_id: int = Form(...),
+                file: Optional[UploadFile] = File(None),
                 db: Session = Depends(get_db),
                 user: User = Depends(get_user)
                 ):
@@ -67,10 +74,27 @@ def add_product(data: AddProduct,
     if not user.isadmin:
         raise HTTPException(status_code=403)
 
-    obj = Product(**data.model_dump()) 
+    obj = Product(title=title,
+                  description=description,
+                  price=price,
+                  category_id=category_id,
+                  ) 
+    
     db.add(obj)
     db.commit()
     db.refresh(obj)
+
+    if file is not None:
+        os.makedirs("static", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f") 
+        name = f"{obj.id}_{obj.title}_{timestamp}_{file.filename}"
+        disk_path = f"static/{name}"
+        with open(disk_path, "wb") as f:
+            f.write(file.file.read())
+        obj.upload_url = disk_path
+        db.commit()
+        db.refresh(obj)
+
     return obj
 
 
