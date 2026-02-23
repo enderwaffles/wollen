@@ -1,11 +1,11 @@
 
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserResponse(BaseModel):
     id: int
-    email: EmailStr
+    email: str
     nickname: str
     name: str
     surname: str
@@ -14,16 +14,24 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class UserSignup(BaseModel):
-    email: EmailStr
+    email: str
     nickname: str
     name: str
     surname: str
     password: str
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class VerifyIn(BaseModel):
-    email: EmailStr
+    email: str
+    code: str
+
+class UserForgot(BaseModel):
+    email: str
+    new_password: str
+
+class UserForgot2(BaseModel):
+    email: str
     code: str

@@ -1,95 +1,67 @@
 <template>
   <Header />
 
-  <div class="title">
+  <div>
     <h1>Вериикация</h1>
   </div>
 
-  <main class="auth">
+  <div>
+    <input type="text" v-model="incode" placeholder="Код" /> <br>
 
-    <div class="card">
+    <button :disabled="loading" @click="verify">{{ loading ? 'Загрузка...' : 'Верификация' }}</button>
+    <p v-if="message" class="error">{{ message }}</p>
+  </div>
 
-      <input
-        type="incode"
-        v-model="incode"
-        placeholder="Код"
-      />
-
-      <button
-        :disabled="loading"
-        @click="verify"
-      >
-        {{ loading ? 'Загрузка...' : 'Верификация' }}
-      </button>
-
-      <p v-if="message" class="error">
-        {{ message }}
-      </p>
-
-      <div class="links">
-        
-      </div>
-
-    </div>
-
-  </main>
 </template>
 
 <script setup>
 import Header from '@/components/Header.vue'
-import { ref } from 'vue'
+import api from '@/api/api'
+import { ref, onMounted  } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/api/api'
 
 const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-const email = ref(route.query.email || '')
 
-const incode = ref('')
 
-const message = ref('')
-const loading = ref(false)
+let email = ref(route.query.email || "")
+let incode = ref("")
+
+let message = ref("")
+let loading = ref(false)
+
+
 
 async function verify() {
-
-  if (!incode.value) {
-    message.value = 'Fill in all fields'
-    return
-  }
-
   try {
     loading.value = true
-    message.value = ''
-
+    message.value = ""
     const res = await api.post('/verify', {
-        email: email.value,
-        code: incode.value
+      email: email.value,
+      code: incode.value
     })
-
     auth.login({
       id: res.data.user.id,
       email: res.data.user.email,
       nickname: res.data.user.nickname,
       name: res.data.user.name,
       surname: res.data.user.surname,
-
+      admin: res.data.user.admin,
     })
-
-    router.push('/')
+    router.push("/")
   }
   catch (error) {
     console.log(error)
-    message.value = 'Signup failed'
+    message.value = "Verify failed"
   }
   finally {
     loading.value = false
   }
 }
+
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
